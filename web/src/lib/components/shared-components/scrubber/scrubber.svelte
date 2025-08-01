@@ -142,7 +142,7 @@
         count: scrubMonth.assetCount,
         height: toScrollY(scrollBarPercentage),
         dateFormatted: scrubMonth.title,
-        year: scrubMonth.year,
+        year: scrubMonth.year + 1,
         month: scrubMonth.month,
         hasLabel: false,
         hasDot: false,
@@ -150,7 +150,6 @@
       top += segment.height;
       if (i === 0) {
         segment.hasDot = true;
-        segment.hasLabel = true;
         previousLabeledSegment = segment;
       } else {
         if (previousLabeledSegment?.year !== segment.year && height > MIN_YEAR_LABEL_DISTANCE) {
