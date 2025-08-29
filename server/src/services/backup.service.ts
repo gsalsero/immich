@@ -113,7 +113,7 @@ export class BackupService extends BaseService {
     try {
       await new Promise<void>((resolve, reject) => {
         const pgdump = this.processRepository.spawn(
-          `/usr/lib/postgresql/${databaseMajorVersion}/bin/pg_dumpall`,
+          process.env.PG_DUMPALL_PATH || `/usr/lib/postgresql/${databaseMajorVersion}/bin/pg_dumpall`,
           databaseParams,
           {
             env: {
