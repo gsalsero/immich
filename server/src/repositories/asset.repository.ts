@@ -169,6 +169,21 @@ export class AssetRepository {
     await this.db.updateTable('asset_exif').set(options).where('assetId', 'in', ids).execute();
   }
 
+  @GenerateSql({ params: [[DummyValue.UUID], DummyValue.NUMBER, DummyValue.STRING] })
+  @Chunked()
+  async updateDateTimeOriginal(
+    ids: string[],
+    delta?: number,
+    timeZone?: string,
+  ): Promise<{ assetId: string; dateTimeOriginal: Date | null; timeZone: string | null }[]> {
+    return await this.db
+      .updateTable('asset_exif')
+      .set({ dateTimeOriginal: sql`"dateTimeOriginal" + ${(delta ?? 0) + ' minute'}::interval`, timeZone })
+      .where('assetId', 'in', ids)
+      .returning(['assetId', 'dateTimeOriginal', 'timeZone'])
+      .execute();
+  }
+
   async upsertJobStatus(...jobStatus: Insertable<AssetJobStatusTable>[]): Promise<void> {
     if (jobStatus.length === 0) {
       return;
@@ -551,7 +566,7 @@ export class AssetRepository {
             sql`asset.type = 'IMAGE'`.as('isImage'),
             sql`asset."deletedAt" is not null`.as('isTrashed'),
             'asset.livePhotoVideoId',
-            sql`extract(epoch from (asset."localDateTime" - asset."fileCreatedAt" at time zone 'UTC'))::real / 3600`.as(
+            sql`extract(epoch from (asset."localDateTime" AT TIME ZONE 'UTC' - asset."fileCreatedAt" at time zone 'UTC'))::real / 3600`.as(
               'localOffsetHours',
             ),
             'asset.ownerId',
